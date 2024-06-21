@@ -1,0 +1,41 @@
+---
+name: Test
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - run: npm i
+      - uses: ./
+        with:
+          repository: mia0x75/action-get-latest-commit
+      - uses: ./
+        with:
+          owner: mia0x75
+          repo: action-get-latest-commit
+      - uses: ./
+        with:
+          owner: mia0x75
+          repo: action-get-latest-commit
+          branch: main
+      - uses: ./
+        with:
+          repository: mia0x75/action-get-latest-commit
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ./
+        with:
+          owner: mia0x75
+          repo: action-get-latest-commit
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ./
+        with:
+          owner: mia0x75
+          repo: action-get-latest-commit
+          branch: main
+          token: ${{ secrets.GITHUB_TOKEN }}

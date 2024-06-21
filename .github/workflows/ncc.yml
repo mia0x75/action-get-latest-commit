@@ -1,0 +1,87 @@
+---
+name: Build with ncc
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+
+permissions:
+  contents: write
+  packages: write
+  actions: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        id: checkout
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: actions/setup-node@v4
+        id: setup
+        with:
+          node-version: 20
+
+      - id: build
+        name: Install npm and package
+        run: |
+          echo "Running npm install..."
+          if ! npm install; then
+            echo "npm install failed"
+            exit 1
+          fi
+    
+          echo "Installing @vercel/ncc globally..."
+          if ! npm install -g "@vercel/ncc"; then
+            echo "Global install of @vercel/ncc failed"
+            exit 1
+          fi
+    
+          echo "Running npm run package..."
+          if ! npm run package; then
+            echo "npm run package failed"
+            exit 1
+          fi
+
+          echo "Removing node_modules directory..."
+          rm -rf node_modules
+
+          echo "Checking git status..."
+          if [ -n "$(git status --short)" ]; then
+            echo "status=needs-update" >> "$GITHUB_OUTPUT"
+          else
+            echo "No changes detected in git status."
+          fi
+    
+      - name: Cleanup code
+        if: steps.build.outputs.status == 'needs-update' && !cancelled()
+        id: cleanup
+        run: |
+          git checkout --orphan tmp_work
+          git branch --delete main
+          DATE="$(date '+%Y/%m/%d')"
+          COMMENT="Build by Github Actions, ${DATE}"
+          echo "comment=${COMMENT}" >> ${GITHUB_OUTPUT}
+
+      - name: Upload to repository
+        id: upload
+        uses: stefanzweifel/git-auto-commit-action@v5.0.1
+        with:
+          commit_message: ${{ steps.cleanup.outputs.comment }}
+          tagging_message: 'v1.0.0'
+          create_branch: true
+          branch: main
+          push_options: --force
+
+      - name: Delete old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 0
+          keep_minimum_runs: 0
+          delete_run_by_conclusion_pattern: "cancelled, skipped, success"
