@@ -1,0 +1,32 @@
+{
+  "name": "action-get-latest-commit",
+  "version": "v1.0.0",
+  "description": "A simple action to get the latest release from a Github repo.",
+  "main": "main.js",
+  "scripts": {
+    "lint": "eslint main.js",
+    "package": "ncc build main.js -o dist",
+    "build": "ncc build main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mia0x75/action-get-latest-commit.git"
+  },
+  "keywords": [
+    "actions",
+    "latest",
+    "commit"
+  ],
+  "bugs": {
+    "url": "https://github.com/mia0x75/action-get-latest-commit/issues"
+  },
+  "homepage": "https://github.com/mia0x75/action-get-latest-commit#readme",
+  "author": "mia0x75",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
+    "@octokit/rest": "^20.1.1"
+  }
+}
